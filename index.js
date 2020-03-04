@@ -10,33 +10,31 @@ const profileSchema = {
     type: String,
     required: true,
     trim: true,
-    isNumeric: true,
-    min: 2,
-    max: 2
+    minLength: 2,
+    maxLength: 2
   },
   birthDay: {
     type: String,
     required: true,
     trim: true,
-    isNumeric: true,
-    min: 2,
-    max: 2
+    minLength: 2,
+    maxLength: 2
   },
   birthYear: {
     type: String,
     required: true,
     trim: true,
     isNumeric: true,
-    min: 4,
-    max: 4
+    minLength: 4,
+    maxLength: 4,
   },
   personalAddress: {
-    street: { type: String, required: true, trim: true },
+    street: { type: Object, required: true, trim: true },
     city: { type: String, required: true, trim: true },
     county: { type: String, required: true, trim: true },
     state: { type: String, required: true, trim: true },
     zipCode: { type: String, required: true, trim: true },
-    districtIds: { type: Array, required: true, min: 0, arrayValues: String }
+    districtIds: { type: Array, required: true, minLength: 0, arrayType: String }
   },
   officeAddress: {
     street: { type: String, required: true, trim: true },
@@ -51,10 +49,11 @@ const profileSchema = {
 class App extends Component {
   render() {
     // VALIDATE SCHEMA
-    const schema = Modeler.Schema(profileSchema);
+    const modeler = new Modeler()
+    const schema = modeler.Schema(profileSchema);
 
     // VALIDATE MODEL
-    const model = Modeler.Model(
+    const model = modeler.Model(
       {
         test: "test"
       },
