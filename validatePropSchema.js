@@ -1,6 +1,6 @@
 import isObject from "./isObject.js";
 
-const validatePropSchema = (key, concatKey, object) => {
+const validatePropSchema = (object, key, concatKey, params) => {
   const propSchema = object[key];
 
   // Check if property schema is an object

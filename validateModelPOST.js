@@ -1,21 +1,18 @@
 import isObject from "./isObject.js";
 
-const validateModelPOST = (key, concatKey, object, document, crudOp) => {
+const validateModelPOST = (object, key, concatKey, params) => {
   const propSchema = object[key]; // Value of property schema to validate document prop value
-  let propValue = document;
-  let error = {}; // Variables ot hold returned error
-  let returnedProp = {}; // variable to hold validated document object to object-spread into returned document
+  const { schema, doc } = params;
+  let propValue = doc;
 
   // Check if property schema is an object
   if (!isObject(propSchema, false)) {
-    error[concatKey] = concatKey + " schema must be an object literal";
-    return { error, returnedProp: {} };
+    return { [concatKey]: concatKey + " schema must be an object literal" };
   }
 
   // Check if propert yschema is an empty object
   if (Object.keys(propSchema).length === 0) {
-    error[concatKey] = concatKey + " schema must not be an empty object";
-    return { error, returnedProp: {} };
+    return { [concatKey]: concatKey + " schema must not be an empty object" };
   }
 
   // Split concatenated schema properties by '.'
@@ -24,7 +21,6 @@ const validateModelPOST = (key, concatKey, object, document, crudOp) => {
   // Loop through props array to get property value from document
   for (var i = 0; i < props.length; i++) {
     propValue = propValue[props[i]];
-    returnedProp[props[i]] = { ...document[props[i]] };
 
     // Check if property is found in schema
     if (
@@ -36,17 +32,7 @@ const validateModelPOST = (key, concatKey, object, document, crudOp) => {
     }
   }
 
-  console.log(`${concatKey} -->`, propValue);
-
-  if (typeof propValue === "undefined") {
-    if (crudOp === "POST") {
-      if (propSchema.required) {
-      }
-    }
-
-    if (crudOp === "PUT") {
-    }
-  }
+  // console.log(`${concatKey} -->`, propValue);
 
   // Loop through given propSchema keys
   for (var prop in propSchema) {
@@ -61,13 +47,11 @@ const validateModelPOST = (key, concatKey, object, document, crudOp) => {
           schemaValue === Boolean
         ) {
           if (propValue !== schemaValue(propValue)) {
-            error[concatKey] = "Must be of type " + schemaValue.name;
-            return { error, returnedProp: {} };
+            return { [concatKey]: "Must be of type " + schemaValue.name };
           }
         } else {
           if (!(propValue instanceof schemaValue)) {
-            error[concatKey] = "Must be of type " + schemaValue.name;
-            return { error, returnedProp: {} };
+            return { [concatKey]: "Must be of type " + schemaValue.name };
           }
         }
         break;
@@ -92,13 +76,13 @@ const validateModelPOST = (key, concatKey, object, document, crudOp) => {
       case "isNumeric":
         break;
       default:
-        error[concatKey] =
-          concatKey + " contains unknown schema key (" + key + ")";
-        return { error, returnedProp: {} };
+        return {
+          [concatKey]: concatKey + " contains unknown schema key (" + key + ")"
+        };
     }
   }
 
-  return { error: {}, returnedProp };
+  return {};
 };
 
 export default validateModelPOST;

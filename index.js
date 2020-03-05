@@ -91,7 +91,7 @@ class App extends Component {
     const schema = modeler.ValidateSchema(profileSchema);
 
     // VALIDATE MODEL
-    const model = modeler.ValidateModel(profileDoc, schema, 'POST');
+    const model = modeler.ValidateModelPOST(profileDoc, schema);
 
     console.log("[SCHEMA]: ", schema);
     console.log("[MODEL]: ", model);
