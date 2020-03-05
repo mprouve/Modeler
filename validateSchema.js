@@ -1,8 +1,57 @@
 import isObject from "./isObject.js";
+import isAtMaxDepth from "./isAtMaxDepth.js";
 
-const validatePropSchema = (object, key, concatKey, params) => {
-  const propSchema = object[key];
+const validateSchema = schema => {
+  let errors = {};
 
+  // Check if Schema is an object literal and is not empty
+  if (!isObject(schema, false)) {
+    this.errors.invalidSchema =
+      "Schema must be an object literal with at least one key-value pair";
+  } else if (Object.keys(schema).length === 0) {
+    this.errors.emptySchema = "Schema must not be an empty object";
+  }
+
+  // Function to traverse all nodes of schema
+  const traverseSchema = (object, prevKey) => {
+    for (var key in object) {
+      let concatKey = key;
+      const value = object[key];
+      const shouldStopNesting = isAtMaxDepth(value);
+
+      if (prevKey) {
+        concatKey = prevKey + "." + key;
+      }
+
+      if (shouldStopNesting) {
+        // VALIDATE EACH KEY VALUE - Call validatePropSchema() function for each schema property
+        const error = validatePropSchema(value, concatKey);
+
+        errors = {
+          ...errors,
+          ...error
+        };
+      } else {
+        // Go one step down in the object tree if object is found!
+        traverseSchema(value, concatKey);
+      }
+    }
+  };
+
+  console.log("-------------- BEG: VALIDATE SCHEMA PROPS --------------");
+  traverseSchema(schema, null);
+  console.log("-------------- END: VALIDATE SCHEMA PROPS --------------");
+
+  // Check to make sure there were no errors
+  if (Object.keys(errors).length > 0) {
+    console.log("[SCHEMA ERRORS] -> ", errors);
+    throw new Error("[ERROR]: Invalid Schema");
+  }
+
+  return { schema, errors };
+};
+
+const validatePropSchema = (propSchema, concatKey) => {
   // Check if property schema is an object
   if (!isObject(propSchema, false)) {
     return { [concatKey]: concatKey + " schema must be an object literal" };
@@ -27,7 +76,7 @@ const validatePropSchema = (object, key, concatKey, params) => {
     };
   }
 
-  console.log(`${concatKey} -->`, object[key]);
+  console.log(`${concatKey} -->`, propSchema); // Debugging
 
   // Loop through given propSchema keys
   for (var prop in propSchema) {
@@ -159,4 +208,4 @@ const validatePropSchema = (object, key, concatKey, params) => {
   return {};
 };
 
-export default validatePropSchema;
+export default validateSchema;

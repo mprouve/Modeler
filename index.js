@@ -86,15 +86,31 @@ const profileDoc = {
 
 class App extends Component {
   render() {
+    let errors = {}
+
     // VALIDATE SCHEMA
     const modeler = new Modeler();
-    const schema = modeler.ValidateSchema(profileSchema);
+    const schemaData = modeler.ValidateSchema(profileSchema);
+    errors = {...errors, ...schemaData.errors}
+
+    if (Object.keys(errors).length > 0) {
+      console.log("[VALIDATE SCHEMA ERRORS]: ", errors)
+
+      return null
+    }
 
     // VALIDATE MODEL
-    const model = modeler.ValidateModelPOST(profileDoc, schema);
+    const createDocData = modeler.ValidateCreateDocument(profileDoc, schemaData.schema);
+    errors = {...errors, ...createDocData.errors}
 
-    console.log("[SCHEMA]: ", schema);
-    console.log("[MODEL]: ", model);
+    if (Object.keys(errors).length > 0) {
+      console.log("[CREATE DOCUMENT ERRORS]: ", errors)
+
+      return null
+    }
+
+    console.log("[SCHEMA]: ", schemaData.schema);
+    console.log("[MODEL]: ", createDocData.doc);
 
     return (
       <div>
