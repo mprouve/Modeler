@@ -20,12 +20,15 @@ const validateCreateDocument = (doc, schema) => {
     this.errors.emptySchema = "Schema must not be an empty object";
   }
 
+  // Create new document variable to hold document with inserted defaultValues if neccessary
+  let returnedDoc = { ...doc };
+
   // STEP 1: MAKE SURE ALL PROPERTIES IN SCHEMA EXIST IN DOCUMENT
   // Function to traverse all nodes of schema
   const traverseSchema = (object, prevKey) => {
     for (var key in object) {
       let concatKey = key;
-      const value = object[key];
+      const value = object[key]; // Represent value of current key in object
       const shouldStopNesting = isAtMaxDepth(value);
 
       if (prevKey) {
@@ -38,7 +41,11 @@ const validateCreateDocument = (doc, schema) => {
         return obj[prop];
       }, doc);
 
-      if (typeof propValue === "undefined" || propValue === null) {
+      // Only return an error here if not currently at deepest part of branch and property is missing from document. Check for undefined / null values happens in validateDocumentProps (At end of branch ONLY)
+      if (
+        (typeof propValue === "undefined" || propValue === null) &&
+        !shouldStopNesting
+      ) {
         errors = {
           ...errors,
           [concatKey]: concatKey + " is a required property"
@@ -102,26 +109,19 @@ const validateCreateDocument = (doc, schema) => {
 
   // Check to make sure there were no errors
   if (Object.keys(errors).length > 0) {
-    console.log("[DOCUMENT ERRORS] -> ", errors);
-    throw new Error("[ERROR]: Invalid Document");
+    console.log("[CREATE DOCUMENT ERRORS] -> ", errors);
+    // throw new Error("[ERROR]: Invalid Document");
+
+    return { doc: null, errors };
   }
 
-  return { doc, errors };
+  return { doc: returnedDoc, errors };
 };
 
-const validateDocumentProp = (propSchema, propValue, concatKey, doc) => {
-  // Check if property schema is an object
-  if (!isObject(propSchema, false)) {
-    return {
-      [concatKey]: concatKey + " property schema must be an object literal"
-    };
-  }
-
-  // Check if propert yschema is an empty object
-  if (Object.keys(propSchema).length === 0) {
-    return {
-      [concatKey]: concatKey + " property schema must not be an empty object"
-    };
+const validateDocumentProp = (propSchema, propValue, concatKey) => {
+  // Check if document property value is undefined or null
+  if (typeof propValue === 'undefined' || propValue === null) {
+    // TODO
   }
 
   console.log(`${concatKey} -->`, propValue);
@@ -132,7 +132,7 @@ const validateDocumentProp = (propSchema, propValue, concatKey, doc) => {
 
     switch (prop) {
       case "type":
-        // Check if String, Number, or Boolean type matches propValue type
+        // Check if String, Number, Boolean, Array, and Object type matches propValue type
         if (
           schemaValue === String ||
           schemaValue === Number ||
@@ -148,10 +148,11 @@ const validateDocumentProp = (propSchema, propValue, concatKey, doc) => {
         }
         break;
       case "defaultValue":
-        break;
-      case "trim":
+        // TODO
         break;
       case "required":
+        break;
+      case "trim":
         break;
       case "minLength":
         break;

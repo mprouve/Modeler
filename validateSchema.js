@@ -44,8 +44,10 @@ const validateSchema = schema => {
 
   // Check to make sure there were no errors
   if (Object.keys(errors).length > 0) {
-    console.log("[SCHEMA ERRORS] -> ", errors);
-    throw new Error("[ERROR]: Invalid Schema");
+    console.log("[VALIDATE SCHEMA ERRORS] -> ", errors);
+    // throw new Error("[ERROR]: Invalid Schema");
+
+    return { schema: null, errors };
   }
 
   return { schema, errors };
@@ -69,10 +71,40 @@ const validatePropSchema = (propSchema, concatKey) => {
     };
   }
 
-  // Check if property 'defaultValue' is included
-  if (typeof propSchema.defaultValue === "undefined") {
+  // Check if neither <required> nor <defaultValue> are provided
+  if (
+    typeof propSchema.required === "undefined" &&
+    typeof propSchema.defaultValue === "undefined"
+  ) {
     return {
-      [concatKey]: concatKey + " schema must include a <defaultValue> property"
+      [concatKey]:
+        concatKey +
+        " schema must include <defaultValue> if <required> is false or is not provided. Must set <required> to true if <defaultValue> is not provided."
+    };
+  }
+
+  // Check if property 'defaultValue' is unddefined and 'required' property is false or undefined
+  if (
+    typeof propSchema.defaultValue === "undefined" &&
+    (propSchema.required === false ||
+      typeof propSchema.required === "undefined")
+  ) {
+    return {
+      [concatKey]:
+        concatKey +
+        " schema must include a <defaultValue> property if <required> is set to false or <required> is not provided"
+    };
+  }
+
+  // Check if property 'defaultValue' is included while 'required' property is set to true
+  if (
+    propSchema.required === true &&
+    typeof propSchema.defaultValue !== "undefined"
+  ) {
+    return {
+      [concatKey]:
+        concatKey +
+        " schema must not include a <defaultValue> property if <required> is set to true"
     };
   }
 
@@ -117,14 +149,14 @@ const validatePropSchema = (propSchema, concatKey) => {
           }
         }
         break;
-      case "trim":
-        // Check if trim is vaild boolean
+      case "required":
+        // Check if required is vaild boolean
         if (value !== true && value !== false) {
           return { [concatKey]: prop + " must be a boolean value" };
         }
         break;
-      case "required":
-        // Check if required is vaild boolean
+      case "trim":
+        // Check if trim is vaild boolean
         if (value !== true && value !== false) {
           return { [concatKey]: prop + " must be a boolean value" };
         }
