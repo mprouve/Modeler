@@ -27,18 +27,18 @@ class Modeler {
    * @param {object} doc The document/object to be compared against the given schema for validation
    * @param {object} schema A schema that has been traversed and validated by the Modeler class
    */
-  ValidateCreateDocument(doc, schema) {
+  ValidateCreateDocument(doc) {
     // Check if schema passed in has been validated by Modeler. If not, return errors and set doc to null to it cant be inserted.
-    if (this.schema !== schema) {
+    if (Object.keys(this.schema).length === 0) {
       const errors = {
-        invalidSchema: "Passed in schema has not been validated."
+        invalidSchema: "Must validate shcema before validating document."
       };
 
       return { errors, doc: null };
     }
 
     // Call validation method for CreateDocument
-    const validateCreateDocData = validateCreateDocument(doc, schema);
+    const validateCreateDocData = validateCreateDocument(doc, this.schema);
 
     return validateCreateDocData;
   }
@@ -48,18 +48,18 @@ class Modeler {
    * @param {object} doc The document/object to be compared against the given schema for validation
    * @param {object} schema A schema that has been traversed and validated by the Modeler class
    */
-  ValidateUpdateDocument(doc, schema) {
+  ValidateUpdateDocument(doc) {
     // Check if schema passed in has been validated by Modeler. If not, return errors and set doc to null to it cant be inserted.
-    if (this.schema !== schema) {
+    if (Object.keys(this.schema).length === 0) {
       const errors = {
-        invalidSchema: "Passed in schema has not been validated."
+        invalidSchema: "Must validate shcema before validating document."
       };
 
       return { errors, doc: null };
     }
 
     // Call validation method for UpdateDocument
-    const validateUpdateDocData = validateUpdateDocument(doc, schema);
+    const validateUpdateDocData = validateUpdateDocument(doc, this.schema);
 
     return validateUpdateDocData;
   }

@@ -119,21 +119,15 @@ class App extends Component {
     // VALIDATE SCHEMA
     const schemaData = modeler.ValidateSchema(profileSchema);
     // CREATE DOCUMENT
-    const createDocData = modeler.ValidateCreateDocument(
-      profileDocCreate,
-      schemaData.schema
-    );
+    const createDocData = modeler.ValidateCreateDocument(profileDocCreate);
     // UPDATE DOCUMENT
-    const updateDocData = modeler.ValidateUpdateDocument(
-      profileDocUpdate,
-      schemaData.schema
-    );
+    const updateDocData = modeler.ValidateUpdateDocument(profileDocUpdate);
 
 
     console.log("[SCHEMA ERRORS]: ", schemaData.errors)
     console.log("[CREATE DOC ERRORS]: ", createDocData.errors)
     console.log("[UPDATE DOC ERRORS]: ", updateDocData.errors)
-    console.log("[SCHEMA]: ", schemaData.schema);
+    console.log("[SCHEMA]: ", modeler.schema);
     console.log("[CREATED DOCUMENT]: ", createDocData.doc);
     console.log("[UPDATED DOCUMENT]: ", updateDocData.doc);
 
