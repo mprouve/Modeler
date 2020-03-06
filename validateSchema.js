@@ -3,18 +3,21 @@ import isAtMaxDepth from "./isAtMaxDepth.js";
 
 const validateSchema = schema => {
   let errors = {};
+  let stopAll = false;
 
   // Check if Schema is an object literal and is not empty
   if (!isObject(schema, false)) {
-    this.errors.invalidSchema =
+    errors.invalidSchema =
       "Schema must be an object literal with at least one key-value pair";
   } else if (Object.keys(schema).length === 0) {
-    this.errors.emptySchema = "Schema must not be an empty object";
+    errors.emptySchema = "Schema must not be an empty object";
   }
 
   // Function to traverse all nodes of schema
   const traverseSchema = (object, prevKey) => {
     for (var key in object) {
+      if (stopAll) break;
+
       let concatKey = key;
       const value = object[key];
       const shouldStopNesting = isAtMaxDepth(value);
@@ -27,10 +30,16 @@ const validateSchema = schema => {
         // VALIDATE EACH KEY VALUE - Call validatePropSchema() function for each schema property
         const error = validatePropSchema(value, concatKey);
 
-        errors = {
-          ...errors,
-          ...error
-        };
+        // Append any errors and break
+        if (Object.keys(error).length > 0) {
+          errors = {
+            ...errors,
+            ...error
+          };
+
+          stopAll = true;
+          break;
+        }
       } else {
         // Go one step down in the object tree if object is found!
         traverseSchema(value, concatKey);
@@ -130,6 +139,7 @@ const validatePropSchema = (propSchema, concatKey) => {
         if (typeof value === "undefined" || value === null) {
           return { [concatKey]: prop + " must not be null or undefined" };
         }
+
         // Check if defaultValue is not match type
         if (
           propSchema.type === String ||
@@ -156,16 +166,30 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
         break;
       case "trim":
+        if (propSchema.type !== String) {
+          return {
+            [concatKey]: "Can only apply " + prop + " to type <String>"
+          };
+        }
+
         // Check if trim is vaild boolean
         if (value !== true && value !== false) {
           return { [concatKey]: prop + " must be a boolean value" };
         }
         break;
       case "minLength":
+        if (propSchema.type !== String && propSchema.type !== Array) {
+          return {
+            [concatKey]:
+              "Can only apply " + prop + " to type <String> and <Array>"
+          };
+        }
+
         // Check if minLength is an integer
         if (typeof value !== "number") {
           return { [concatKey]: prop + " must be an integer" };
         }
+
         // Check if minLength is not a float or negative
         if (typeof value === "number" && (value % 1 !== 0 || value < 0)) {
           return {
@@ -174,10 +198,18 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
         break;
       case "maxLength":
+        if (propSchema.type !== String && propSchema.type !== Array) {
+          return {
+            [concatKey]:
+              "Can only apply " + prop + " to type <String> and <Array>"
+          };
+        }
+
         // Check if maxLength is an integer
         if (typeof value !== "number") {
           return { [concatKey]: prop + " must be an integer" };
         }
+
         // Check if maxLength is not a float or negative
         if (typeof value === "number" && (value % 1 !== 0 || value < 0)) {
           return {
@@ -186,20 +218,34 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
         break;
       case "minValue":
+        if (propSchema.type !== Number) {
+          return {
+            [concatKey]: "Can only apply " + prop + " to type <Number>"
+          };
+        }
+
         // Check if minValue is an integer
         if (typeof value !== "number") {
           return { [concatKey]: prop + " must be an integer" };
         }
+
         // Check if minValue is not a float
         if (typeof value === "number" && value % 1 !== 0) {
           return { [concatKey]: prop + " cannot be a float value" };
         }
         break;
       case "maxValue":
+        if (propSchema.type !== Number) {
+          return {
+            [concatKey]: "Can only apply " + prop + " to type <Number>"
+          };
+        }
+
         // Check if maxValue is an integer
         if (typeof value !== "number") {
           return { [concatKey]: prop + " must be an integer" };
         }
+
         // Check if maxValue is not a float
         if (typeof value === "number" && value % 1 !== 0) {
           return { [concatKey]: prop + " cannot be a float value" };
@@ -214,6 +260,12 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
         break;
       case "arrayType":
+        if (propSchema.type !== Array) {
+          return {
+            [concatKey]: "Can only apply " + prop + " to type <Array>"
+          };
+        }
+
         // Check if arrayType is a valid javascript type function
         if (typeof value !== "function") {
           return {
@@ -224,7 +276,13 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
         break;
       case "isNumeric":
-        // Check if isNUmeric is a boolean
+        if (propSchema.type !== String) {
+          return {
+            [concatKey]: "Can only apply " + prop + " to type <String>"
+          };
+        }
+
+        // Check if isNumeric is a boolean
         if (value !== true && value !== false) {
           return { [concatKey]: prop + " must be a boolean value" };
         }

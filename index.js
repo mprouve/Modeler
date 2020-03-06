@@ -58,72 +58,15 @@ const profileSchema = {
       trim: true,
       isNumeric: true
     }
-  }
+  },
+  // hello: {type: String, required: true, regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,15}$/}
 };
 
-// FOR TESTING IF SCHEMA HAS BEEN VALIDATING (PASS INTO Modeler.ValidateCreateDocument instead of validated schema)
-// const profileSchema2 = {
-//   avatar: { type: String, defaultValue: "", required: false, trim: true },
-//   birthMonth: {
-//     type: String,
-//     defaultValue: "",
-//     required: false,
-//     trim: true,
-//     minLength: 2,
-//     maxLength: 2
-//   },
-//   birthDay: {
-//     type: String,
-//     defaultValue: "",
-//     required: false,
-//     trim: true,
-//     minLength: 2,
-//     maxLength: 2
-//   },
-//   birthYear: {
-//     type: String,
-//     defaultValue: "",
-//     required: false,
-//     trim: true,
-//     isNumeric: true,
-//     minLength: 4,
-//     maxLength: 4
-//   },
-//   personalAddress: {
-//     street: { type: String, defaultValue: "", required: false, trim: true },
-//     city: { type: String, defaultValue: "", required: false, trim: true },
-//     county: { type: String, defaultValue: "", required: false, trim: true },
-//     state: { type: String, defaultValue: "", required: false, trim: true },
-//     zipCode: { type: String, defaultValue: "", required: false, trim: true },
-//     districtIds: {
-//       type: Array,
-//       defaultValue: [],
-//       required: false,
-//       minLength: 0,
-//       arrayType: String
-//     }
-//   },
-//   officeAddress: {
-//     street: { type: String, defaultValue: "", required: false, trim: true },
-//     city: { type: String, defaultValue: "", required: false, trim: true },
-//     county: { type: String, defaultValue: "", required: false, trim: true },
-//     state: { type: String, defaultValue: "", required: false, trim: true },
-//     zipCode: { type: String, defaultValue: "", required: false, trim: true },
-//     districtId: {
-//       type: String,
-//       defaultValue: "",
-//       required: false,
-//       trim: true,
-//       isNumeric: true
-//     }
-//   }
-// };
-
 const profileDoc = {
-  avatar: "http://www.cloudinary.com/",
-  birthMonth: "01",
-  birthDay: "18",
-  birthYear: null,
+  avatar: "       http://www.cloudinary.com/     ",
+  birthMonth: "02",
+  birthDay: "16",
+  birthYear: "1993",
   personalAddress: {
     street: "53rd St. and 2nd Ave.",
     city: "New York",
@@ -133,20 +76,24 @@ const profileDoc = {
     districtIds: ["544"]
   },
   officeAddress: {
-    street: "Greacen point Lane",
+    street: "lakjd",
     city: "Mamaroneck",
     county: "Westchester",
     state: "New York",
     zipCode: "10543",
     districtId: "544"
-  }
+  },
+  // hello: "Password1"
 };
 
 class App extends Component {
   render() {
     let errors = {};
 
-    /// Create Modeler Instance
+    // REGEXP EXAMPLE
+    // /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/
+
+    // Create Modeler Instance
     const modeler = new Modeler();
 
     // VALIDATE SCHEMA
@@ -159,7 +106,7 @@ class App extends Component {
     );
 
     console.log("[SCHEMA]: ", schemaData.schema);
-    console.log("[MODEL]: ", createDocData.doc);
+    console.log("[DOCUMENT]: ", createDocData.doc);
 
     return (
       <div>
