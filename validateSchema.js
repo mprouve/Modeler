@@ -229,34 +229,34 @@ const validatePropSchema = (propSchema, concatKey) => {
 
         // Make sure default value aligns with type in <arrayType> property
         // **************************************************
-        if (typeof propSchema.arrayType !== "undefined") {
-          for (var j = 0; j < value.length; j++) {
+        // if (typeof propSchema.arrayType !== "undefined") {
+        //   for (var j = 0; j < value.length; j++) {
             
-            if (Array.isArray(propSchema.arrayType)) {
-            } else {
-              // Check if defaultValue is not match type
-              if (
-                propSchema.arrayType === String ||
-                propSchema.arrayType === Number ||
-                propSchema.arrayType === Boolean
-              ) {
-                if (value !== propSchema.type(value)) {
-                  return {
-                    [concatKey]:
-                      prop + " must be of type " + propSchema.type.name
-                  };
-                }
-              } else {
-                if (!(value instanceof propSchema.type)) {
-                  return {
-                    [concatKey]:
-                      prop + " must be of type " + propSchema.type.name
-                  };
-                }
-              }
-            }
-          }
-        }
+        //     if (Array.isArray(propSchema.arrayType)) {
+        //     } else {
+        //       // Check if defaultValue is not match type
+        //       if (
+        //         propSchema.arrayType === String ||
+        //         propSchema.arrayType === Number ||
+        //         propSchema.arrayType === Boolean
+        //       ) {
+        //         if (value !== propSchema.type(value)) {
+        //           return {
+        //             [concatKey]:
+        //               prop + " must be of type " + propSchema.type.name
+        //           };
+        //         }
+        //       } else {
+        //         if (!(value instanceof propSchema.type)) {
+        //           return {
+        //             [concatKey]:
+        //               prop + " must be of type " + propSchema.type.name
+        //           };
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
         break;
       case "required":
         // Check if required is vaild boolean
