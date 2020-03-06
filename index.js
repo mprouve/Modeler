@@ -81,7 +81,7 @@ const profileDocCreate = {
     county: "Westchester",
     state: "New York",
     zipCode: "10543",
-    districtId: "544"
+    districtId: null
   },
   // hello: "Password1"
 };
@@ -103,8 +103,7 @@ const profileDocUpdate = {
     city: "Mamaroneck",
     county: "Westchester",
     state: "New York",
-    zipCode: "10543",
-    districtId: "544"
+    zipCode: "10543"
   },
   // hello: "Password1"
 };
