@@ -262,9 +262,11 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
         }
         break;
       case "regex":
-        if (!schemaValue.test(newPropValue)) {
-          error[concatKey] = concatKey + " does not pass regex test";
-          return { error };
+        if (propSchema.defaultValue !== newPropValue) {
+          if (!schemaValue.test(newPropValue)) {
+            error[concatKey] = concatKey + " does not pass regex test";
+            return { error };
+          }
         }
         break;
       case "arrayType":

@@ -32,12 +32,11 @@ const profileSchema = {
     city: { type: String, defaultValue: "", required: false, trim: true },
     county: { type: String, defaultValue: "", required: false, trim: true },
     state: { type: String, defaultValue: "", required: false, trim: true },
-    zipCode: { type: String, defaultValue: "", required: false, trim: true },
+    zipCode: { type: String, defaultValue: '', trim: true, regex: /(^\d{5}$)|(^\d{5}-\d{4}$)/ },
     districtIds: {
       type: Array,
       defaultValue: [],
-      required: false,
-      arrayType: [String, RegExp]
+      required: false
     }
   },
   officeAddress: {
@@ -67,7 +66,7 @@ const profileDocCreate = {
     city: "New York",
     county: "New York",
     state: "New York",
-    zipCode: "10010",
+    // zipCode: "10010",
     districtIds: ["544"]
   },
   officeAddress: {
