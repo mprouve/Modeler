@@ -4,7 +4,6 @@
  * @param {object}  value - Any variable whose value will be tested to be an object
  * @param {boolean}  includeArray - Boolean to check whether we want to include arrays as objects
  */
-
 const isObject = (value, includeArray) => {
 	// Check for [object Array] and [object Object]
   	if (includeArray) {

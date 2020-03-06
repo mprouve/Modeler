@@ -62,7 +62,7 @@ const profileSchema = {
   // hello: {type: String, required: true, regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,15}$/}
 };
 
-const profileDoc = {
+const profileDocCreate = {
   avatar: "       http://www.cloudinary.com/     ",
   birthMonth: "02",
   birthDay: "16",
@@ -86,10 +86,31 @@ const profileDoc = {
   // hello: "Password1"
 };
 
+const profileDocUpdate = {
+  avatar: "       http://www.cloudinary.com/     ",
+  birthMonth: "02",
+  birthDay: "16",
+  personalAddress: {
+    street: "53rd St. and 2nd Ave.",
+    city: "New York",
+    county: "New York",
+    state: "New York",
+    zipCode: "10010",
+    districtIds: ["544"]
+  },
+  officeAddress: {
+    street: "lakjd",
+    city: "Mamaroneck",
+    county: "Westchester",
+    state: "New York",
+    zipCode: "10543",
+    districtId: "544"
+  },
+  // hello: "Password1"
+};
+
 class App extends Component {
   render() {
-    let errors = {};
-
     // REGEXP EXAMPLE
     // /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/
 
@@ -98,15 +119,24 @@ class App extends Component {
 
     // VALIDATE SCHEMA
     const schemaData = modeler.ValidateSchema(profileSchema);
-
-    // VALIDATE MODEL
+    // CREATE DOCUMENT
     const createDocData = modeler.ValidateCreateDocument(
-      profileDoc,
+      profileDocCreate,
+      schemaData.schema
+    );
+    // UPDATE DOCUMENT
+    const updateDocData = modeler.ValidateUpdateDocument(
+      profileDocUpdate,
       schemaData.schema
     );
 
+
+    console.log("[SCHEMA ERRORS]: ", schemaData.errors)
+    console.log("[CREATE DOC ERRORS]: ", createDocData.errors)
+    console.log("[UPDATE DOC ERRORS]: ", updateDocData.errors)
     console.log("[SCHEMA]: ", schemaData.schema);
-    console.log("[DOCUMENT]: ", createDocData.doc);
+    console.log("[CREATED DOCUMENT]: ", createDocData.doc);
+    console.log("[UPDATED DOCUMENT]: ", updateDocData.doc);
 
     return (
       <div>

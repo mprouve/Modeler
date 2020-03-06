@@ -3,11 +3,11 @@ import isAtMaxDepth from "./isAtMaxDepth.js";
 import setNestedPropFromString from "./setNestedPropFromString.js";
 
 /**
- * Function called by the class method to (Create a new document in a collection) traverse and validate 1) the schema to make sure all properties found in the document pass type checking and 2) the document itself to make sure there are no properties that don't exists in the schema passed in.
+ * Function called by the class method to (Update an existing document ina collection) traverse and validate 1) the schema to make sure all properties found in the document pass type checking and 2) the document itself to make sure there are no properties that don't exists in the schema passed in.
  * @param {object} doc The document for which the schema is used to type check every property traversed
  * @param {object} schema Teh schema used to validate the document passed in.
  */
-const validateCreateDocument = (doc, schema) => {
+const validateUpdateDocument = (doc, schema) => {
   let errors = {};
   let stopAll = false;
 
@@ -19,10 +19,10 @@ const validateCreateDocument = (doc, schema) => {
     errors.emptyDoc = "Document must not be an empty object";
   }
 
-  // Create new document variable to hold document with inserted defaultValues if neccessary
+  // Update existing document variable to hold document with trimmed values, etc... if neccessary
   let returnedDoc = { ...doc };
 
-  // STEP 1: MAKE SURE THERE ARE NO PROPERTIES IN DOCUMENT THAT DONT EXIST IN SCHEMA
+  // STEP 1: MAKE SURE THERE ARE NO PROPERTIES IN DOCUMENT THAT DONT EXIST IN SCHEMA AND TYPE CHECK VALUES
   // Function to traverse all nodes of document
   const traverseDocument = (object, prevKey) => {
     for (var key in object) {
@@ -51,52 +51,11 @@ const validateCreateDocument = (doc, schema) => {
         break;
       }
 
-      if (!shouldStopNesting) {
-        // Go one step down in the object tree if object is found!
-        traverseDocument(value, concatKey);
-      }
-    }
-  };
-
-  // STEP 2: MAKE SURE ALL PROPERTIES IN SCHEMA EXIST IN DOCUMENT AND TYPE_CHECK
-  // Function to traverse all nodes of schema
-  const traverseSchema = (object, prevKey) => {
-    for (var key in object) {
-      if (stopAll) break;
-
-      let concatKey = key;
-      const value = object[key]; // Represent value of current key in object
-      const shouldStopNesting = isAtMaxDepth(value);
-
-      if (prevKey) {
-        concatKey = prevKey + "." + key;
-      }
-
-      // For CREATE document *ONLY*
-      // Check if any property while traversing is not found in document
-      var propValue = concatKey.split(".").reduce((obj, prop) => {
-        return obj[prop];
-      }, returnedDoc);
-
-      // Only return an error here if not currently at deepest part of branch and property is missing from document. Check for undefined / null values happens in validateDocumentProps (At end of branch ONLY)
-      if (
-        (typeof propValue === "undefined" || propValue === null) &&
-        !shouldStopNesting
-      ) {
-        errors = {
-          ...errors,
-          [concatKey]: concatKey + " is a required property"
-        };
-
-        stopAll = true;
-        break;
-      }
-
       if (shouldStopNesting) {
         // VALIDATE EACH KEY VALUE - Call validateDocumentProp() function for each schema property
         const { error, newPropValue } = validateDocumentProp(
+          propSchema,
           value,
-          propValue,
           concatKey
         );
 
@@ -117,20 +76,19 @@ const validateCreateDocument = (doc, schema) => {
         }
       } else {
         // Go one step down in the object tree if object is found!
-        traverseSchema(value, concatKey);
+        traverseDocument(value, concatKey);
       }
     }
   };
 
-  console.log("---------- BEG: CREATE DOCUMENT PROPS ----------");
+  console.log("---------- BEG: UPDATE DOCUMENT PROPS ----------");
   traverseDocument(returnedDoc, null); // Make sure no document properties are absent in schema
-  traverseSchema(schema, null); // Validate all fields in document against Schema
-  console.log("---------- END: CREATE DOCUMENT PROPS ----------");
+  console.log("---------- END: UPDATE DOCUMENT PROPS ----------");
 
   // Check to make sure there were no errors
   if (Object.keys(errors).length > 0) {
-    console.log("[CREATE DOCUMENT ERRORS] -> ", errors);
-    // throw new Error("[ERROR]: Invalid Document for CREATE");
+    console.log("[UPDATE DOCUMENT ERRORS] -> ", errors);
+    // throw new Error("[ERROR]: Invalid Document for UPDATE");
 
     return { doc: null, errors };
   }
@@ -153,19 +111,11 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   console.log(`${concatKey} -->`, propValue);
 
   // **********************************************************
-  // Take care of required and defaultValue props right away!!
+  // Take care of undefined or null props right away!!
   // **********************************************************
   if (isUndefined) {
-    if (propSchema.required === true) {
-      error[concatKey] = concatKey + " property is required";
-      return { error };
-    }
-
-    // set propValue to default Value
-    newPropValue = propSchema.defaultValue;
-
-    // Return default value now since all other schema props dont apply to values set by defaultValue
-    return { error, newPropValue };
+    error[concatKey] = concatKey + " cannot be null or undefined";
+    return { error };
   }
 
   // **********************************************************
@@ -195,10 +145,10 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
       // TYPE CASE IS TAKEN CARE OF ABOVE
       case "type":
         break;
-      // DEFAULT VALUE CASE IS TAKEN CARE OF ABOVE
+      // IGNORE CASE FOR UPDATE DOCUMENT
       case "defaultValue":
         break;
-      // REQUIRED CASE IS TAKEN CARE OF ABOVE
+      // IGNORE CASE FOR UPDATE DOCUMENT
       case "required":
         break;
       case "trim":
@@ -215,7 +165,7 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
         break;
       case "maxLength":
         if (newPropValue.length > schemaValue) {
-          error[concatKey] =
+          error[concatKey] = 
             concatKey + " length must be at most " + schemaValue;
           return { error };
         }
@@ -282,4 +232,4 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   return { error, newPropValue };
 };
 
-export default validateCreateDocument;
+export default validateUpdateDocument;

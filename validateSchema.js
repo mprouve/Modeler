@@ -1,6 +1,10 @@
 import isObject from "./isObject.js";
 import isAtMaxDepth from "./isAtMaxDepth.js";
 
+/**
+ * Function called by the class method to traverse and validate the entire schema object passed in.
+ * @param {object} schema The schema to validate for correctness
+ */
 const validateSchema = schema => {
   let errors = {};
   let stopAll = false;
@@ -47,9 +51,9 @@ const validateSchema = schema => {
     }
   };
 
-  console.log("-------------- BEG: VALIDATE SCHEMA PROPS --------------");
+  console.log("---------- BEG: VALIDATE SCHEMA PROPS ----------");
   traverseSchema(schema, null);
-  console.log("-------------- END: VALIDATE SCHEMA PROPS --------------");
+  console.log("---------- END: VALIDATE SCHEMA PROPS ----------");
 
   // Check to make sure there were no errors
   if (Object.keys(errors).length > 0) {
@@ -62,6 +66,11 @@ const validateSchema = schema => {
   return { schema, errors };
 };
 
+/**
+ * Function to type check an individual property schema
+ * @param {object} propSchema The property schema to validate for correctness
+ * @param {string} concatKey The string representing the path of the property schema
+ */
 const validatePropSchema = (propSchema, concatKey) => {
   // Check if property schema is an object
   if (!isObject(propSchema, false)) {
