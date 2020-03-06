@@ -23,7 +23,7 @@ const profileSchema = {
     maxLength: 2
   },
   birthYear: {
-    type: String,
+    type: [String],
     defaultValue: "",
     required: false,
     trim: true,

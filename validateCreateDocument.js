@@ -170,20 +170,47 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
 
   // **********************************************************
   // Take care of type prop right away!!
+  // If type is an Array of types, check each index
   // **********************************************************
-  if (
-    propSchema.type === String ||
-    propSchema.type === Number ||
-    propSchema.type === Boolean
-  ) {
-    if (newPropValue !== propSchema.type(newPropValue)) {
-      error[concatKey] = "Must be of type " + propSchema.type.name;
+  if (propSchema.type instanceof Array) {
+    let doesMatch = false;
+    let typeString = "";
+
+    for (var i = 0; i < propSchema.type.length; i++) {
+      const type = propSchema.type[i];
+      typeString += i === 0 ? type.name : ", " + type.name;
+      if (type === String || type === Number || type === Boolean) {
+        if (newPropValue !== type(newPropValue)) {
+          error[concatKey] = "Must be of type " + type.name;
+          return { error };
+        }
+      } else {
+        if (!(newPropValue instanceof type)) {
+          error[concatKey] = "Must be of type " + type.name;
+          return { error };
+        }
+      }
+    }
+
+    if (!doesMatch) {
+      error[concatKey] = "Must be of types " + typeString;
       return { error };
     }
   } else {
-    if (!(newPropValue instanceof propSchema.type)) {
-      error[concatKey] = "Must be of type " + propSchema.type.name;
-      return { error };
+    if (
+      propSchema.type === String ||
+      propSchema.type === Number ||
+      propSchema.type === Boolean
+    ) {
+      if (newPropValue !== propSchema.type(newPropValue)) {
+        error[concatKey] = "Must be of type " + propSchema.type.name;
+        return { error };
+      }
+    } else {
+      if (!(newPropValue instanceof propSchema.type)) {
+        error[concatKey] = "Must be of type " + propSchema.type.name;
+        return { error };
+      }
     }
   }
 
@@ -242,25 +269,47 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
         break;
       case "arrayType":
         for (var i = 0; i < newPropValue.length; i++) {
-          if (
-            propSchema.arrayType === String ||
-            propSchema.arrayType === Number ||
-            propSchema.arrayType === Boolean
-          ) {
-            if (newPropValue[i] !== schemaValue(newPropValue[i])) {
+          if (schemaValue instanceof Array) {
+            let doesMatch = false;
+            const val = newPropValue[i]
+            const typeString = schemaValue.map(value => value.name).join(', ')
+
+            for (var j = 0; j < schemaValue.length; j++) {
+              const type = schemaValue[j];
+
+              if (type === String || type === Number || type === Boolean) {
+                if (val === type(val)) {
+                  doesMatch = true;
+                  break
+                }
+              } else {
+                if (val instanceof type) {
+                  doesMatch = true;
+                  break
+                }
+              }
+            }
+
+            if (!doesMatch) {
               error[concatKey] =
-                concatKey +
-                " array children must be of type " +
-                schemaValue.name;
+                concatKey + " array children must be of types " + typeString;
               return { error };
             }
           } else {
-            if (!(newPropValue[i] instanceof schemaValue(newPropValue[i]))) {
-              error[concatKey] =
-                concatKey +
-                " array children must be of type " +
-                schemaValue.name;
-              return { error };
+            if (
+              schemaValue === String ||
+              schemaValue === Number ||
+              schemaValue === Boolean
+            ) {
+              if (newPropValue[i] !== schemaValue(newPropValue[i])) {
+                error[concatKey] = "Must be of type " + schemaValue.name;
+                return { error };
+              }
+            } else {
+              if (!(newPropValue[i] instanceof schemaValue)) {
+                error[concatKey] = "Must be of type " + schemaValue.name;
+                return { error };
+              }
             }
           }
         }

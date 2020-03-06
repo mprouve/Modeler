@@ -134,13 +134,30 @@ const validatePropSchema = (propSchema, concatKey) => {
 
     switch (prop) {
       case "type":
+        console.log(value instanceof Array);
+
         // Check if type is a valid Javascript type function
-        if (typeof value !== "function") {
+        if (typeof value !== "function" && !(value instanceof Array)) {
           return {
             [concatKey]:
               prop +
-              " must be a valid Javascript Type Function (String, Number, etc...)"
+              " must be a valid Javascript Type Function (String, Number, etc...) or an Array of Javascript Type Functions"
           };
+        }
+
+        if (value instanceof Array) {
+          let typeString = "";
+
+          for (var i = 0; i < value.length; i++) {
+            const type = value[i];
+            if (typeof type !== "function") {
+              return {
+                [concatKey]:
+                  prop +
+                  " array can only include valid Javascript Type Functions (String, Number, etc...)"
+              };
+            }
+          }
         }
         break;
       case "defaultValue":
@@ -276,12 +293,27 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
 
         // Check if arrayType is a valid javascript type function
-        if (typeof value !== "function") {
+        if (typeof value !== "function" && !(value instanceof Array)) {
           return {
             [concatKey]:
               prop +
-              " must be a valid Javascript Type Function (String, Number, etc...)"
+              " must be a valid Javascript Type Function (String, Number, etc...) or an array of Javascript Type Functions"
           };
+        }
+
+        if (value instanceof Array) {
+          let typeString = "";
+
+          for (var i = 0; i < value.length; i++) {
+            const type = value[i];
+            if (typeof type !== "function") {
+              return {
+                [concatKey]:
+                  prop +
+                  " array can only include valid Javascript Type Functions (String, Number, etc...)"
+              };
+            }
+          }
         }
         break;
       case "isNumeric":
