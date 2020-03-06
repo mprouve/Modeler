@@ -229,34 +229,71 @@ const validatePropSchema = (propSchema, concatKey) => {
 
         // Make sure default value aligns with type in <arrayType> property
         // **************************************************
-        // if (typeof propSchema.arrayType !== "undefined") {
-        //   for (var j = 0; j < value.length; j++) {
-            
-        //     if (Array.isArray(propSchema.arrayType)) {
-        //     } else {
-        //       // Check if defaultValue is not match type
-        //       if (
-        //         propSchema.arrayType === String ||
-        //         propSchema.arrayType === Number ||
-        //         propSchema.arrayType === Boolean
-        //       ) {
-        //         if (value !== propSchema.type(value)) {
-        //           return {
-        //             [concatKey]:
-        //               prop + " must be of type " + propSchema.type.name
-        //           };
-        //         }
-        //       } else {
-        //         if (!(value instanceof propSchema.type)) {
-        //           return {
-        //             [concatKey]:
-        //               prop + " must be of type " + propSchema.type.name
-        //           };
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
+        if (typeof propSchema.arrayType !== "undefined") {
+          for (var j = 0; j < value.length; j++) {
+            const defValue = value[j];
+            console.log(defValue);
+
+            if (Array.isArray(propSchema.arrayType)) {
+              let doesMatch = false;
+              const typeString = propSchema.arrayType
+                .map(type => type.name)
+                .join(", ");
+
+              for (var k = 0; k < propSchema.arrayType.length; k++) {
+                const currType = propSchema.arrayType[k];
+
+                if (
+                  currType === String ||
+                  currType === Number ||
+                  currType === Boolean
+                ) {
+                  if (defValue === currType(defValue)) {
+                    doesMatch = true;
+                    break;
+                  }
+                } else {
+                  if (defValue instanceof currType) {
+                    doesMatch = true;
+                    break;
+                  }
+                }
+              }
+
+              if (!doesMatch) {
+                return {
+                  [concatKey]:
+                    concatKey + " defaultValue array children must be of types " + typeString
+                };
+              }
+            } else {
+              // Check if defaultValue is not match type
+              if (
+                propSchema.arrayType === String ||
+                propSchema.arrayType === Number ||
+                propSchema.arrayType === Boolean
+              ) {
+                if (defValue !== propSchema.arrayType(defValue)) {
+                  return {
+                    [concatKey]:
+                      prop +
+                      " array children must be of type " +
+                      propSchema.arrayType.name
+                  };
+                }
+              } else {
+                if (!(defValue instanceof propSchema.arrayType)) {
+                  return {
+                    [concatKey]:
+                      prop +
+                      " array children must be of type " +
+                      propSchema.arrayType.name
+                  };
+                }
+              }
+            }
+          }
+        }
         break;
       case "required":
         // Check if required is vaild boolean

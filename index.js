@@ -35,9 +35,9 @@ const profileSchema = {
     zipCode: { type: String, defaultValue: "", required: false, trim: true },
     districtIds: {
       type: Array,
-      defaultValue: [/^/],
+      defaultValue: [],
       required: false,
-      arrayType: [String, Number]
+      arrayType: [String, RegExp]
     }
   },
   officeAddress: {
