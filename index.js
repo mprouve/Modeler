@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { render } from "react-dom";
 import Hello from "./Hello";
 import "./style.css";
-import Modeler from "./modeler.js";
+import MongoValidator from "./mongo-validator.js";
 
 const profileSchema = {
   avatar: { type: String, defaultValue: "", required: false, trim: true },
@@ -114,20 +114,20 @@ class App extends Component {
     // /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/
 
     // Create Modeler Instance
-    const modeler = new Modeler();
+    const mongoValidator = new MongoValidator();
 
     // VALIDATE SCHEMA
-    const schemaData = modeler.ValidateSchema(profileSchema);
+    const schemaData = mongoValidator.ValidateSchema(profileSchema);
     // CREATE DOCUMENT
-    const createDocData = modeler.ValidateCreateDocument(profileDocCreate);
+    const createDocData = mongoValidator.ValidateCreateDocument(profileDocCreate);
     // UPDATE DOCUMENT
-    const updateDocData = modeler.ValidateUpdateDocument(profileDocUpdate);
+    const updateDocData = mongoValidator.ValidateUpdateDocument(profileDocUpdate);
 
 
     console.log("[SCHEMA ERRORS]: ", schemaData.errors)
     console.log("[CREATE DOC ERRORS]: ", createDocData.errors)
     console.log("[UPDATE DOC ERRORS]: ", updateDocData.errors)
-    console.log("[SCHEMA]: ", modeler.schema);
+    console.log("[SCHEMA]: ", mongoValidator.schema);
     console.log("[CREATED DOCUMENT]: ", createDocData.doc);
     console.log("[UPDATED DOCUMENT]: ", updateDocData.doc);
 

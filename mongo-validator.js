@@ -1,12 +1,12 @@
-import reservedSchemaProps from "./reservedSchemaProps.js";
 import validateSchema from "./validateSchema.js";
 import validateCreateDocument from "./validateCreateDocument.js";
 import validateUpdateDocument from "./validateUpdateDocument.js";
-import isObject from "./isObject.js";
 
-// Modeler Class Function
-class Modeler {
-  schema = {};
+// MongoValidator Class Function
+class MongoValidator {
+  constructor() {
+    this.schema = {};
+  }
 
   /**
    * Function to traverse and validate all properties of given schema then return the schema
@@ -65,4 +65,4 @@ class Modeler {
   }
 }
 
-export default Modeler;
+export default MongoValidator;
