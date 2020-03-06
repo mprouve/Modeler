@@ -232,7 +232,6 @@ const validatePropSchema = (propSchema, concatKey) => {
         if (typeof propSchema.arrayType !== "undefined") {
           for (var j = 0; j < value.length; j++) {
             const defValue = value[j];
-            console.log(defValue);
 
             if (Array.isArray(propSchema.arrayType)) {
               let doesMatch = false;
