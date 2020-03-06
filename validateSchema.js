@@ -83,9 +83,9 @@ const validatePropSchema = (propSchema, concatKey) => {
   }
 
   // Check if property 'type' is included
-  if (typeof propSchema.type === "undefined") {
+  if (typeof propSchema.type === "undefined" || propSchema.type === null) {
     return {
-      [concatKey]: concatKey + " schema must include a <type> property"
+      [concatKey]: concatKey + " schema <type> must not be undefined or null"
     };
   }
 
@@ -132,56 +132,129 @@ const validatePropSchema = (propSchema, concatKey) => {
   for (var prop in propSchema) {
     const value = propSchema[prop];
 
+    // Check if defaultValue is null or undefined
+    if (typeof value === "undefined" || value === null) {
+      return { [concatKey]: prop + " must not be null or undefined" };
+    }
+
     switch (prop) {
       case "type":
-        console.log(value instanceof Array);
-
-        // Check if type is a valid Javascript type function
-        if (typeof value !== "function" && !(value instanceof Array)) {
-          return {
-            [concatKey]:
-              prop +
-              " must be a valid Javascript Type Function (String, Number, etc...) or an Array of Javascript Type Functions"
-          };
-        }
-
-        if (value instanceof Array) {
-          let typeString = "";
-
-          for (var i = 0; i < value.length; i++) {
-            const type = value[i];
-            if (typeof type !== "function") {
+        // Check if type is a valid Javascript type function or is an array of javascript type functions
+        if (typeof value !== "function") {
+          if (Array.isArray(value)) {
+            if (value.length === 0) {
               return {
                 [concatKey]:
                   prop +
-                  " array can only include valid Javascript Type Functions (String, Number, etc...)"
+                  " array must include valid Javascript Type Functions (String, Number, etc...)"
               };
             }
+
+            for (var i = 0; i < value.length; i++) {
+              const type = value[i];
+
+              if (typeof type !== "function") {
+                return {
+                  [concatKey]:
+                    prop +
+                    " array can only include valid Javascript Type Functions (String, Number, etc...)"
+                };
+              }
+            }
+          } else {
+            return {
+              [concatKey]:
+                prop +
+                " must be a valid Javascript Type Function (String, Number, etc...) or an Array of Javascript Type Functions"
+            };
           }
         }
         break;
       case "defaultValue":
-        // Check if defaultValue is not null or undefined
+        // Check if defaultValue is null or undefined
         if (typeof value === "undefined" || value === null) {
           return { [concatKey]: prop + " must not be null or undefined" };
         }
 
-        // Check if defaultValue is not match type
-        if (
-          propSchema.type === String ||
-          propSchema.type === Number ||
-          propSchema.type === Boolean
-        ) {
-          if (value !== propSchema.type(value)) {
+        // Make sure default value aligns with type in <type> property
+        // **************************************************
+        if (Array.isArray(propSchema.type)) {
+          let doesMatch = false;
+
+          for (var i = 0; i < propSchema.type.length; i++) {
+            const type = propSchema.type[i];
+            const typeString = propSchema.type
+              .map(type => type.name)
+              .join(", ");
+
+            // Check if defaultValue is not match type
+            if (type === String || type === Number || type === Boolean) {
+              if (value === type(value)) {
+                doesMatch = true;
+                break;
+              }
+            } else {
+              if (value instanceof type) {
+                doesMatch = true;
+                break;
+              }
+            }
+          }
+
+          if (!doesMatch) {
             return {
-              [concatKey]: prop + " must be of type " + propSchema.type.name
+              [concatKey]: prop + " must be of types " + typeString
             };
           }
         } else {
-          if (!(value instanceof propSchema.type)) {
-            return {
-              [concatKey]: prop + " must be of type " + propSchema.type.name
-            };
+          // Check if defaultValue is not match type
+          if (
+            propSchema.type === String ||
+            propSchema.type === Number ||
+            propSchema.type === Boolean
+          ) {
+            if (value !== propSchema.type(value)) {
+              return {
+                [concatKey]: prop + " must be of type " + propSchema.type.name
+              };
+            }
+          } else {
+            if (!(value instanceof propSchema.type)) {
+              return {
+                [concatKey]: prop + " must be of type " + propSchema.type.name
+              };
+            }
+          }
+        }
+
+        // Make sure default value aligns with type in <arrayType> property
+        // **************************************************
+        if (typeof propSchema.arrayType !== "undefined") {
+          for (var j = 0; j < value.length; j++) {
+            
+            if (Array.isArray(propSchema.arrayType)) {
+            } else {
+              // Check if defaultValue is not match type
+              if (
+                propSchema.arrayType === String ||
+                propSchema.arrayType === Number ||
+                propSchema.arrayType === Boolean
+              ) {
+                if (value !== propSchema.type(value)) {
+                  return {
+                    [concatKey]:
+                      prop + " must be of type " + propSchema.type.name
+                  };
+                }
+              } else {
+                if (!(value instanceof propSchema.type)) {
+                  return {
+                    [concatKey]:
+                      prop + " must be of type " + propSchema.type.name
+                  };
+                }
+              }
+            }
           }
         }
         break;
@@ -292,8 +365,8 @@ const validatePropSchema = (propSchema, concatKey) => {
           };
         }
 
-        // Check if arrayType is a valid javascript type function
-        if (typeof value !== "function" && !(value instanceof Array)) {
+        // Check if arrayType is a valid javascript type function or Array of javascript type functions
+        if (typeof value !== "function" && !Array.isArray(value)) {
           return {
             [concatKey]:
               prop +
@@ -301,11 +374,19 @@ const validatePropSchema = (propSchema, concatKey) => {
           };
         }
 
-        if (value instanceof Array) {
-          let typeString = "";
+        // Check if arrayType is array of javascript type functions
+        if (Array.isArray(value)) {
+          if (value.length === 0) {
+            return {
+              [concatKey]:
+                prop +
+                " array must include valid Javascript Type Functions (String, Number, etc...)"
+            };
+          }
 
           for (var i = 0; i < value.length; i++) {
             const type = value[i];
+
             if (typeof type !== "function") {
               return {
                 [concatKey]:

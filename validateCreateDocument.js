@@ -172,22 +172,22 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   // Take care of type prop right away!!
   // If type is an Array of types, check each index
   // **********************************************************
-  if (propSchema.type instanceof Array) {
+  if (Array.isArray(propSchema.type)) {
     let doesMatch = false;
-    let typeString = "";
+    const typeString = propSchema.type.map(type => type.name).join(", ");
 
     for (var i = 0; i < propSchema.type.length; i++) {
       const type = propSchema.type[i];
-      typeString += i === 0 ? type.name : ", " + type.name;
+
       if (type === String || type === Number || type === Boolean) {
-        if (newPropValue !== type(newPropValue)) {
-          error[concatKey] = "Must be of type " + type.name;
-          return { error };
+        if (newPropValue === type(newPropValue)) {
+          doesMatch = true;
+          break;
         }
       } else {
-        if (!(newPropValue instanceof type)) {
-          error[concatKey] = "Must be of type " + type.name;
-          return { error };
+        if (newPropValue instanceof type) {
+          doesMatch = true;
+          break;
         }
       }
     }
@@ -269,10 +269,10 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
         break;
       case "arrayType":
         for (var i = 0; i < newPropValue.length; i++) {
-          if (schemaValue instanceof Array) {
+          if (Array.isArray(schemaValue)) {
             let doesMatch = false;
-            const val = newPropValue[i]
-            const typeString = schemaValue.map(value => value.name).join(', ')
+            const val = newPropValue[i];
+            const typeString = schemaValue.map(value => value.name).join(", ");
 
             for (var j = 0; j < schemaValue.length; j++) {
               const type = schemaValue[j];
@@ -280,12 +280,12 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
               if (type === String || type === Number || type === Boolean) {
                 if (val === type(val)) {
                   doesMatch = true;
-                  break
+                  break;
                 }
               } else {
                 if (val instanceof type) {
                   doesMatch = true;
-                  break
+                  break;
                 }
               }
             }

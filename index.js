@@ -23,13 +23,9 @@ const profileSchema = {
     maxLength: 2
   },
   birthYear: {
-    type: [String],
+    type: [Array, String],
     defaultValue: "",
-    required: false,
-    trim: true,
-    isNumeric: true,
-    minLength: 4,
-    maxLength: 4
+    required: false
   },
   personalAddress: {
     street: { type: String, defaultValue: "", required: false, trim: true },
@@ -39,10 +35,9 @@ const profileSchema = {
     zipCode: { type: String, defaultValue: "", required: false, trim: true },
     districtIds: {
       type: Array,
-      defaultValue: [],
+      defaultValue: [/^/],
       required: false,
-      minLength: 0,
-      arrayType: String
+      arrayType: [String, Number]
     }
   },
   officeAddress: {
