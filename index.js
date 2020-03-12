@@ -79,7 +79,31 @@ const profileSchema = {
   }
 };
 
-const profileDocCreate = {};
+const profileDocCreate = {
+  avatar: "       http://www.cloudinary.com/     ",
+  email: "       prouve.MaRCO@gmail.Com      ",
+  // numVotes: 0,
+  valFnTest: "",
+  birthMonth: "02",
+  birthDay: "16",
+  birthYear: "1993",
+  personalAddress: {
+    street: "53rd St. and 2nd Ave.",
+    city: "New York",
+    county: "New York",
+    state: "New York",
+    zipCode: "10010",
+    districtIds: ["544"]
+  },
+  officeAddress: {
+    street: "lakjd",
+    city: "Mamaroneck",
+    county: "Westchester",
+    state: "New York",
+    zipCode: "10543",
+    districtId: null
+  }
+};
 
 const profileDocUpdate = {
   avatar: "       http://www.cloudinary.com/     ",
