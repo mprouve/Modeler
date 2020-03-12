@@ -6,14 +6,25 @@ import MongoValidator from "./mongo-validator.js";
 
 const profileSchema = {
   avatar: { type: String, defaultValue: "", required: false, trim: true },
-  email: { type: String, defaultValue: "", required: false, trim: true, toLowerCase: true },
-  valFnTest: {type: String, required: true, validationFn: value => {
-    if (value === "hello1") {
-      return true
-    }
+  email: {
+    type: String,
+    defaultValue: "",
+    required: false,
+    trim: true,
+    toLowerCase: true
+  },
+  numVotes: {type: Number, defaultValue: 0, preventSet: true},
+  valFnTest: {
+    type: String,
+    defaultValue: "",
+    validationFn: value => {
+      if (value === "hello1") {
+        return true;
+      }
 
-    return false
-  }},
+      return false;
+    }
+  },
   birthMonth: {
     type: String,
     defaultValue: "",
@@ -40,7 +51,12 @@ const profileSchema = {
     city: { type: String, defaultValue: "", required: false, trim: true },
     county: { type: String, defaultValue: "", required: false, trim: true },
     state: { type: String, defaultValue: "", required: false, trim: true },
-    zipCode: { type: String, defaultValue: '', trim: true, regex: /(^\d{5}$)|(^\d{5}-\d{4}$)/ },
+    zipCode: {
+      type: String,
+      defaultValue: "",
+      trim: true,
+      regex: /(^\d{5}$)|(^\d{5}-\d{4}$)/
+    },
     districtIds: {
       type: Array,
       defaultValue: [],
@@ -60,37 +76,15 @@ const profileSchema = {
       trim: true,
       isNumeric: true
     }
-  },
+  }
 };
 
-const profileDocCreate = {
-  avatar: "       http://www.cloudinary.com/     ",
-  email: "       prouve.MaRCO@gmail.Com      ",
-  valFnTest: "hello1",
-  birthMonth: "02",
-  birthDay: "16",
-  birthYear: "1993",
-  personalAddress: {
-    street: "53rd St. and 2nd Ave.",
-    city: "New York",
-    county: "New York",
-    state: "New York",
-    zipCode: "10010",
-    districtIds: ["544"]
-  },
-  officeAddress: {
-    street: "lakjd",
-    city: "Mamaroneck",
-    county: "Westchester",
-    state: "New York",
-    zipCode: "10543",
-    districtId: null
-  },
-};
+const profileDocCreate = {};
 
 const profileDocUpdate = {
   avatar: "       http://www.cloudinary.com/     ",
   email: "       prouve.MaRCO@gmail.Com      ",
+  // numVotes: 0,
   valFnTest: "hello1",
   birthMonth: "02",
   birthDay: "16",
@@ -108,7 +102,7 @@ const profileDocUpdate = {
     county: "Westchester",
     state: "New York",
     zipCode: "10543"
-  },
+  }
 };
 
 class App extends Component {
@@ -122,13 +116,17 @@ class App extends Component {
     // VALIDATE SCHEMA
     const schemaData = mongoValidator.ValidateSchema(profileSchema);
     // CREATE DOCUMENT
-    const createDocData = mongoValidator.ValidateCreateDocument(profileDocCreate);
+    const createDocData = mongoValidator.ValidateCreateDocument(
+      profileDocCreate
+    );
     // UPDATE DOCUMENT
-    const updateDocData = mongoValidator.ValidateUpdateDocument(profileDocUpdate);
+    const updateDocData = mongoValidator.ValidateUpdateDocument(
+      profileDocUpdate
+    );
 
-    console.log("[SCHEMA ERRORS]: ", schemaData.errors)
-    console.log("[CREATE DOC ERRORS]: ", createDocData.errors)
-    console.log("[UPDATE DOC ERRORS]: ", updateDocData.errors)
+    console.log("[SCHEMA ERRORS]: ", schemaData.errors);
+    console.log("[CREATE DOC ERRORS]: ", createDocData.errors);
+    console.log("[UPDATE DOC ERRORS]: ", updateDocData.errors);
     console.log("[SCHEMA]: ", mongoValidator.schema);
     console.log("[CREATED DOCUMENT]: ", createDocData.doc);
     console.log("[UPDATED DOCUMENT]: ", updateDocData.doc);

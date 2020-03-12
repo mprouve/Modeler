@@ -11,6 +11,10 @@ const setNestedPropFromString = (obj, value, path) => {
   path = path.split(".");
 
   for (i = 0; i < path.length - 1; i++) {
+    if (typeof obj[path[i]] === "undefined") {
+      obj[path[i]] = {};
+    }
+
     obj = obj[path[i]];
   }
 

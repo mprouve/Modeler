@@ -15,9 +15,11 @@ const validateCreateDocument = (doc, schema) => {
   if (!isObject(doc, false)) {
     errors.invalidDoc =
       "Document must be an object literal with at least one key-value pair";
-  } else if (Object.keys(doc).length === 0) {
-    errors.emptyDoc = "Document must not be an empty object";
   }
+  
+  // if (Object.keys(doc).length === 0) {
+  //   errors.emptyDoc = "Document must not be an empty object";
+  // }
 
   // Create new document variable to hold document with inserted defaultValues if neccessary
   let returnedDoc = { ...doc };
@@ -75,22 +77,26 @@ const validateCreateDocument = (doc, schema) => {
       // For CREATE document *ONLY*
       // Check if any property while traversing is not found in document
       var propValue = concatKey.split(".").reduce((obj, prop) => {
+        if (typeof obj === 'undefined') {
+          return undefined
+        } 
+
         return obj[prop];
       }, returnedDoc);
 
       // Only return an error here if not currently at deepest part of branch and property is missing from document. Check for undefined / null values happens in validateDocumentProps (At end of branch ONLY)
-      if (
-        (typeof propValue === "undefined" || propValue === null) &&
-        !shouldStopNesting
-      ) {
-        errors = {
-          ...errors,
-          [concatKey]: concatKey + " is a required property"
-        };
+      // if (
+      //   (typeof propValue === "undefined" || propValue === null) &&
+      //   !shouldStopNesting
+      // ) {
+      //   errors = {
+      //     ...errors,
+      //     [concatKey]: concatKey + " is a required property"
+      //   };
 
-        stopAll = true;
-        break;
-      }
+      //   stopAll = true;
+      //   break;
+      // }
 
       if (shouldStopNesting) {
         // VALIDATE EACH KEY VALUE - Call validateDocumentProp() function for each schema property
@@ -150,7 +156,7 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   const isUndefined =
     typeof newPropValue === "undefined" || newPropValue === null;
 
-  console.log(`${concatKey} -->`, propValue)
+  console.log(`${concatKey} -->`, propValue);
 
   // **********************************************************
   // Take care of required and defaultValue props right away!!
@@ -166,6 +172,13 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
 
     // Return default value now since all other schema props dont apply to values set by defaultValue
     return { error, newPropValue };
+  }
+
+  if (typeof propSchema.defaultValue !== "undefined") {
+    if (propSchema.defaultValue === newPropValue && propSchema.preventSet !== true) {
+      // Return default value now
+      return { error, newPropValue };
+    }
   }
 
   // **********************************************************
@@ -334,12 +347,12 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
         }
         break;
       case "validationFn":
-        let result
+        let result;
 
         try {
-          result = schemaValue(newPropValue)
+          result = schemaValue(newPropValue);
         } catch {
-          result = false
+          result = false;
         }
 
         if (result !== true) {

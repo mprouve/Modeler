@@ -120,6 +120,16 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   }
 
   // **********************************************************
+  // Take care of defaultValue prop right away!!
+  // **********************************************************
+  if (typeof propSchema.defaultValue !== "undefined") {
+    if (propSchema.defaultValue === newPropValue && propSchema.preventSet !== true) {
+      // Return default value now since all other schema props dont apply to values set by defaultValue
+      return { error, newPropValue };
+    }
+  }
+
+  // **********************************************************
   // Take care of type prop right away!!
   // If type is an Array of types, check each index
   // **********************************************************
@@ -284,12 +294,12 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
         }
         break;
       case "validationFn":
-        let result
+        let result;
 
         try {
-          result = schemaValue(newPropValue)
+          result = schemaValue(newPropValue);
         } catch {
-          result = false
+          result = false;
         }
 
         if (result !== true) {
