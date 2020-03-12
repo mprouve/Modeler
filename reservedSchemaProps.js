@@ -1,15 +1,18 @@
 const reservedSchemaProps = [
   "type", // Required
-  "defaultValue", // Required
-  "trim",
+  "defaultValue", 
   "required",
+  "preventSet",
+  "trim",
+  "toLowerCase",
   "minLength",
   "maxLength",
   "minValue",
   "maxValue",
   "regex",
   "arrayType",
-  "isNumeric"
+  "isNumeric",
+  "validationFn"
 ];
 
 export default reservedSchemaProps;

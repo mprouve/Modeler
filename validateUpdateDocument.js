@@ -93,6 +93,7 @@ const validateUpdateDocument = (doc, schema) => {
     return { doc: null, errors };
   }
 
+  // Append whenModified: Date.now() to returned Document
   return { doc: returnedDoc, errors };
 };
 
@@ -178,9 +179,20 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
       // IGNORE CASE FOR UPDATE DOCUMENT
       case "required":
         break;
+      case "preventSet":
+        if (schemaValue === true) {
+          error[concatKey] = "Not allowed to set value for " + concatKey;
+          return { error };
+        }
+        break;
       case "trim":
         if (schemaValue === true) {
           newPropValue = newPropValue.trim();
+        }
+        break;
+      case "toLowerCase":
+        if (schemaValue === true) {
+          newPropValue = newPropValue.toLowerCase();
         }
         break;
       case "minLength":
@@ -268,6 +280,20 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
       case "isNumeric":
         if (isNaN(newPropValue)) {
           error[concatKey] = concatKey + " must be a numeric string";
+          return { error };
+        }
+        break;
+      case "validationFn":
+        let result
+
+        try {
+          result = schemaValue(newPropValue)
+        } catch {
+          result = false
+        }
+
+        if (result !== true) {
+          error[concatKey] = concatKey + " did not pass validation function.";
           return { error };
         }
         break;

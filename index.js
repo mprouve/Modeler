@@ -6,6 +6,14 @@ import MongoValidator from "./mongo-validator.js";
 
 const profileSchema = {
   avatar: { type: String, defaultValue: "", required: false, trim: true },
+  email: { type: String, defaultValue: "", required: false, trim: true, toLowerCase: true },
+  valFnTest: {type: String, required: true, validationFn: value => {
+    if (value === "hello1") {
+      return true
+    }
+
+    return false
+  }},
   birthMonth: {
     type: String,
     defaultValue: "",
@@ -53,11 +61,12 @@ const profileSchema = {
       isNumeric: true
     }
   },
-  // hello: {type: String, required: true, regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,15}$/}
 };
 
 const profileDocCreate = {
   avatar: "       http://www.cloudinary.com/     ",
+  email: "       prouve.MaRCO@gmail.Com      ",
+  valFnTest: "hello1",
   birthMonth: "02",
   birthDay: "16",
   birthYear: "1993",
@@ -66,7 +75,7 @@ const profileDocCreate = {
     city: "New York",
     county: "New York",
     state: "New York",
-    // zipCode: "10010",
+    zipCode: "10010",
     districtIds: ["544"]
   },
   officeAddress: {
@@ -77,11 +86,12 @@ const profileDocCreate = {
     zipCode: "10543",
     districtId: null
   },
-  // hello: "Password1"
 };
 
 const profileDocUpdate = {
   avatar: "       http://www.cloudinary.com/     ",
+  email: "       prouve.MaRCO@gmail.Com      ",
+  valFnTest: "hello1",
   birthMonth: "02",
   birthDay: "16",
   personalAddress: {
@@ -99,7 +109,6 @@ const profileDocUpdate = {
     state: "New York",
     zipCode: "10543"
   },
-  // hello: "Password1"
 };
 
 class App extends Component {
@@ -116,7 +125,6 @@ class App extends Component {
     const createDocData = mongoValidator.ValidateCreateDocument(profileDocCreate);
     // UPDATE DOCUMENT
     const updateDocData = mongoValidator.ValidateUpdateDocument(profileDocUpdate);
-
 
     console.log("[SCHEMA ERRORS]: ", schemaData.errors)
     console.log("[CREATE DOC ERRORS]: ", createDocData.errors)

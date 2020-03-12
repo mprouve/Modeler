@@ -150,7 +150,7 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   const isUndefined =
     typeof newPropValue === "undefined" || newPropValue === null;
 
-  console.log(`${concatKey} -->`, propValue);
+  console.log(`${concatKey} -->`, propValue)
 
   // **********************************************************
   // Take care of required and defaultValue props right away!!
@@ -228,9 +228,20 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
       // REQUIRED CASE IS TAKEN CARE OF ABOVE
       case "required":
         break;
+      case "preventSet":
+        if (schemaValue === true) {
+          error[concatKey] = "Not allowed to set value for " + concatKey;
+          return { error };
+        }
+        break;
       case "trim":
         if (schemaValue === true) {
           newPropValue = newPropValue.trim();
+        }
+        break;
+      case "toLowerCase":
+        if (schemaValue === true) {
+          newPropValue = newPropValue.toLowerCase();
         }
         break;
       case "minLength":
@@ -319,6 +330,20 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
       case "isNumeric":
         if (isNaN(newPropValue)) {
           error[concatKey] = concatKey + " must be a numeric string";
+          return { error };
+        }
+        break;
+      case "validationFn":
+        let result
+
+        try {
+          result = schemaValue(newPropValue)
+        } catch {
+          result = false
+        }
+
+        if (result !== true) {
+          error[concatKey] = concatKey + " did not pass validation function.";
           return { error };
         }
         break;

@@ -89,18 +89,6 @@ const validatePropSchema = (propSchema, concatKey) => {
     };
   }
 
-  // Check if neither <required> nor <defaultValue> are provided
-  if (
-    typeof propSchema.required === "undefined" &&
-    typeof propSchema.defaultValue === "undefined"
-  ) {
-    return {
-      [concatKey]:
-        concatKey +
-        " schema must include <defaultValue> if <required> is false or is not provided. Must set <required> to true if <defaultValue> is not provided."
-    };
-  }
-
   // Check if property 'defaultValue' is unddefined and 'required' property is false or undefined
   if (
     typeof propSchema.defaultValue === "undefined" &&
@@ -110,7 +98,7 @@ const validatePropSchema = (propSchema, concatKey) => {
     return {
       [concatKey]:
         concatKey +
-        " schema must include a <defaultValue> property if <required> is set to false or <required> is not provided"
+        " schema must include a <defaultValue> property if <required> is set to false or <required> is not provided."
     };
   }
 
@@ -126,7 +114,7 @@ const validatePropSchema = (propSchema, concatKey) => {
     };
   }
 
-  console.log(`${concatKey} -->`, propSchema); // Debugging
+  console.log(`${concatKey} -->`, propSchema) // Debugging
 
   // Loop through given propSchema keys
   for (var prop in propSchema) {
@@ -180,12 +168,10 @@ const validatePropSchema = (propSchema, concatKey) => {
         // **************************************************
         if (Array.isArray(propSchema.type)) {
           let doesMatch = false;
+          const typeString = propSchema.type.map(type => type.name).join(", ");
 
           for (var i = 0; i < propSchema.type.length; i++) {
             const type = propSchema.type[i];
-            const typeString = propSchema.type
-              .map(type => type.name)
-              .join(", ");
 
             // Check if defaultValue is not match type
             if (type === String || type === Number || type === Boolean) {
@@ -229,7 +215,10 @@ const validatePropSchema = (propSchema, concatKey) => {
 
         // Make sure default value aligns with type in <arrayType> property
         // **************************************************
-        if (typeof propSchema.arrayType !== "undefined") {
+        if (
+          typeof propSchema.arrayType !== "undefined" &&
+          Array.isArray(value)
+        ) {
           for (var j = 0; j < value.length; j++) {
             const defValue = value[j];
 
@@ -262,7 +251,9 @@ const validatePropSchema = (propSchema, concatKey) => {
               if (!doesMatch) {
                 return {
                   [concatKey]:
-                    concatKey + " defaultValue array children must be of types " + typeString
+                    concatKey +
+                    " defaultValue array children must be of types " +
+                    typeString
                 };
               }
             } else {
@@ -300,6 +291,19 @@ const validatePropSchema = (propSchema, concatKey) => {
           return { [concatKey]: prop + " must be a boolean value" };
         }
         break;
+      case "preventSet":
+        if (propSchema.required === true && value === true) {
+          return {
+            [concatKey]:
+              "Can not set <" + prop + "> to true if <required> is set to true"
+          };
+        }
+
+        // Check if allowSet is valid boolean
+        if (value !== true && value !== false) {
+          return { [concatKey]: prop + " must be a boolean value" };
+        }
+        break;
       case "trim":
         if (propSchema.type !== String) {
           return {
@@ -308,6 +312,18 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
 
         // Check if trim is vaild boolean
+        if (value !== true && value !== false) {
+          return { [concatKey]: prop + " must be a boolean value" };
+        }
+        break;
+      case "toLowerCase":
+        if (propSchema.type !== String) {
+          return {
+            [concatKey]: "Can only apply " + prop + " to type <String>"
+          };
+        }
+
+        // Check if toLowerCase is vaild boolean
         if (value !== true && value !== false) {
           return { [concatKey]: prop + " must be a boolean value" };
         }
@@ -387,6 +403,12 @@ const validatePropSchema = (propSchema, concatKey) => {
         }
         break;
       case "regex":
+        if (propSchema.type !== String) {
+          return {
+            [concatKey]: "Can only apply " + prop + " to type String"
+          };
+        }
+
         // Check if regex is a valid regex expression
         if (!(value instanceof RegExp)) {
           return {
@@ -444,6 +466,20 @@ const validatePropSchema = (propSchema, concatKey) => {
         if (value !== true && value !== false) {
           return { [concatKey]: prop + " must be a boolean value" };
         }
+        break;
+      case "validationFn":
+        // Check if given value is a function
+        if (!value || {}.toString.call(value) !== "[object Function]") {
+          return { [concatKey]: prop + " must be a function" };
+        }
+
+        const temp = value("test");
+
+        // Check if passed in value will result in a boolean value
+        if (temp !== true && temp !== false) {
+          return { [concatKey]: prop + " must return a boolean value" };
+        }
+
         break;
       default:
         // Catch any unrecognized schema prop values
