@@ -1,6 +1,5 @@
 import isObject from "./isObject.js";
 import isAtMaxDepth from "./isAtMaxDepth.js";
-import setNestedPropFromString from "./setNestedPropFromString.js";
 
 /**
  * Function called by the class method to (Update an existing document ina collection) traverse and validate 1) the schema to make sure all properties found in the document pass type checking and 2) the document itself to make sure there are no properties that don't exists in the schema passed in.
@@ -9,6 +8,7 @@ import setNestedPropFromString from "./setNestedPropFromString.js";
  */
 const validateUpdateDocument = (doc, schema) => {
   let errors = {};
+  let returnedDoc = {};
   let stopAll = false;
 
   // Check if Document is an object literal and is not empty
@@ -18,9 +18,6 @@ const validateUpdateDocument = (doc, schema) => {
   } else if (Object.keys(doc).length === 0) {
     errors.emptyDoc = "Document must not be an empty object";
   }
-
-  // Update existing document variable to hold document with trimmed values, etc... if neccessary
-  let returnedDoc = { ...doc };
 
   // STEP 1: MAKE SURE THERE ARE NO PROPERTIES IN DOCUMENT THAT DONT EXIST IN SCHEMA AND TYPE CHECK VALUES
   // Function to traverse all nodes of document
@@ -72,7 +69,7 @@ const validateUpdateDocument = (doc, schema) => {
 
         // Set value returned from validation into returned document variable (for setting defaultValues)
         if (typeof newPropValue !== "undefined") {
-          setNestedPropFromString(returnedDoc, newPropValue, concatKey);
+          returnedDoc[concatKey] = newPropValue;
         }
       } else {
         // Go one step down in the object tree if object is found!
@@ -82,7 +79,7 @@ const validateUpdateDocument = (doc, schema) => {
   };
 
   console.log("---------- BEG: UPDATE DOCUMENT PROPS ----------");
-  traverseDocument(returnedDoc, null); // Make sure no document properties are absent in schema
+  traverseDocument(doc, null); // Make sure no document properties are absent in schema
   console.log("---------- END: UPDATE DOCUMENT PROPS ----------");
 
   // Check to make sure there were no errors
@@ -109,7 +106,15 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   const isUndefined =
     typeof newPropValue === "undefined" || newPropValue === null;
 
-  console.log(`${concatKey} -->`, propValue);
+  console.log(`${concatKey} -->`, propValue)
+
+  // **********************************************************
+  // Take care of readOnly fields right away!!
+  // **********************************************************
+  if (propSchema.readOnly === true) {
+    error[concatKey] = "Write not allowed - " + concatKey + " is readOnly";
+    return { error };
+  }
 
   // **********************************************************
   // Take care of undefined or null props right away!!
@@ -123,7 +128,7 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   // Take care of defaultValue prop right away!!
   // **********************************************************
   if (typeof propSchema.defaultValue !== "undefined") {
-    if (propSchema.defaultValue === newPropValue && propSchema.preventSet !== true) {
+    if (propSchema.defaultValue === newPropValue) {
       // Return default value now since all other schema props dont apply to values set by defaultValue
       return { error, newPropValue };
     }
@@ -189,11 +194,8 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
       // IGNORE CASE FOR UPDATE DOCUMENT
       case "required":
         break;
-      case "preventSet":
-        if (schemaValue === true) {
-          error[concatKey] = "Not allowed to set value for " + concatKey;
-          return { error };
-        }
+      // READONLY CASE IS TAKEN CARE OF ABOVE
+      case "readOnly":
         break;
       case "trim":
         if (schemaValue === true) {
@@ -275,12 +277,12 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
               schemaValue === Boolean
             ) {
               if (val !== schemaValue(val)) {
-                error[concatKey] = "Must be of type " + schemaValue.name;
+                error[concatKey] = "Array children must be of type " + schemaValue.name;
                 return { error };
               }
             } else {
               if (!(val instanceof schemaValue)) {
-                error[concatKey] = "Must be of type " + schemaValue.name;
+                error[concatKey] = "Array children must be of type " + schemaValue.name;
                 return { error };
               }
             }

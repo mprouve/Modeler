@@ -16,9 +16,9 @@ const validateCreateDocument = (doc, schema) => {
     errors.invalidDoc =
       "Document must be an object literal with at least one key-value pair";
   }
-  
+
   // if (Object.keys(doc).length === 0) {
-  //   errors.emptyDoc = "Document must not be an empty object";
+  //     errors.emptyDoc = 'Document must not be an empty object'
   // }
 
   // Create new document variable to hold document with inserted defaultValues if neccessary
@@ -77,25 +77,22 @@ const validateCreateDocument = (doc, schema) => {
       // For CREATE document *ONLY*
       // Check if any property while traversing is not found in document
       var propValue = concatKey.split(".").reduce((obj, prop) => {
-        if (typeof obj === 'undefined') {
-          return undefined
-        } 
+        if (typeof obj === "undefined") {
+          return undefined;
+        }
 
         return obj[prop];
       }, returnedDoc);
 
-      // Only return an error here if not currently at deepest part of branch and property is missing from document. Check for undefined / null values happens in validateDocumentProps (At end of branch ONLY)
-      // if (
-      //   (typeof propValue === "undefined" || propValue === null) &&
-      //   !shouldStopNesting
-      // ) {
-      //   errors = {
-      //     ...errors,
-      //     [concatKey]: concatKey + " is a required property"
-      //   };
+      // // Only return an error here if not currently at deepest part of branch and property is missing from document. Check for undefined / null values happens in validateDocumentProps (At end of branch ONLY)
+      // if ((typeof propValue === 'undefined' || propValue === null) && !shouldStopNesting) {
+      //     errors = {
+      //         ...errors,
+      //         [concatKey]: concatKey + ' is a required property'
+      //     }
 
-      //   stopAll = true;
-      //   break;
+      //     stopAll = true
+      //     break
       // }
 
       if (shouldStopNesting) {
@@ -128,14 +125,14 @@ const validateCreateDocument = (doc, schema) => {
     }
   };
 
-  console.log("---------- BEG: CREATE DOCUMENT PROPS ----------");
+  // console.log('---------- BEG: CREATE DOCUMENT PROPS ----------')
   traverseDocument(returnedDoc, null); // Make sure no document properties are absent in schema
   traverseSchema(schema, null); // Validate all fields in document against Schema
-  console.log("---------- END: CREATE DOCUMENT PROPS ----------");
+  // console.log('---------- END: CREATE DOCUMENT PROPS ----------')
 
   // Check to make sure there were no errors
   if (Object.keys(errors).length > 0) {
-    console.log("[CREATE DOCUMENT ERRORS] -> ", errors);
+    // console.log('[CREATE DOCUMENT ERRORS] -> ', errors)
     // throw new Error("[ERROR]: Invalid Document for CREATE");
 
     return { doc: null, errors };
@@ -156,7 +153,15 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   const isUndefined =
     typeof newPropValue === "undefined" || newPropValue === null;
 
-  console.log(`${concatKey} -->`, propValue);
+  console.log(`${concatKey} -->`, propValue)
+
+  // **********************************************************
+  // Take care of readOnly fields right away!!
+  // **********************************************************
+  if (!isUndefined && propSchema.readOnly === true) {
+    error[concatKey] = "Write not allowed - " + concatKey + " is readOnly";
+    return { error };
+  }
 
   // **********************************************************
   // Take care of required and defaultValue props right away!!
@@ -175,7 +180,7 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
   }
 
   if (typeof propSchema.defaultValue !== "undefined") {
-    if (propSchema.defaultValue === newPropValue && propSchema.preventSet !== true) {
+    if (propSchema.defaultValue === newPropValue) {
       // Return default value now
       return { error, newPropValue };
     }
@@ -241,11 +246,8 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
       // REQUIRED CASE IS TAKEN CARE OF ABOVE
       case "required":
         break;
-      case "preventSet":
-        if (schemaValue === true) {
-          error[concatKey] = "Not allowed to set value for " + concatKey;
-          return { error };
-        }
+      // READONLY CASE IS TAKEN CARE OF ABOVE
+      case "readOnly":
         break;
       case "trim":
         if (schemaValue === true) {
@@ -328,12 +330,12 @@ const validateDocumentProp = (propSchema, propValue, concatKey) => {
               schemaValue === Boolean
             ) {
               if (newPropValue[i] !== schemaValue(newPropValue[i])) {
-                error[concatKey] = "Must be of type " + schemaValue.name;
+                error[concatKey] = "Array children must be of type " + schemaValue.name;
                 return { error };
               }
             } else {
               if (!(newPropValue[i] instanceof schemaValue)) {
-                error[concatKey] = "Must be of type " + schemaValue.name;
+                error[concatKey] = "Array children must be of type " + schemaValue.name;
                 return { error };
               }
             }

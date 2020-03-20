@@ -13,7 +13,7 @@ const profileSchema = {
     trim: true,
     toLowerCase: true
   },
-  numVotes: {type: Number, defaultValue: 0, preventSet: true},
+  numVotes: { type: Number, defaultValue: 0, readOnly: true },
   valFnTest: {
     type: String,
     defaultValue: "",
@@ -60,7 +60,8 @@ const profileSchema = {
     districtIds: {
       type: Array,
       defaultValue: [],
-      required: false
+      required: false,
+      arrayType: String
     }
   },
   officeAddress: {
@@ -117,7 +118,6 @@ const profileDocUpdate = {
     city: "New York",
     county: "New York",
     state: "New York",
-    zipCode: "10010",
     districtIds: ["544"]
   },
   officeAddress: {

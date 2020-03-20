@@ -2,7 +2,7 @@ const reservedSchemaProps = [
   "type", // Required
   "defaultValue", 
   "required",
-  "preventSet",
+  "readOnly",
   "trim",
   "toLowerCase",
   "minLength",

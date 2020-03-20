@@ -291,7 +291,7 @@ const validatePropSchema = (propSchema, concatKey) => {
           return { [concatKey]: prop + " must be a boolean value" };
         }
         break;
-      case "preventSet":
+      case "readOnly":
         if (propSchema.required === true && value === true) {
           return {
             [concatKey]:
